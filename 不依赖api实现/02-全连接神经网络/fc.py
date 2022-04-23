@@ -1,36 +1,39 @@
-
 from functools import reduce
 import random
 import numpy as np
 from activators import SigmoidActivator, IdentityActivator
-class FullConnectedLayer():
-    def __init__(self, input_size, output_size, activator) -> None:
-        """_summary_
 
-        Args:
-            input_size (_type_): _description_本层输入向量的维度
-            output_size (_type_): _description_ 本层输出向量的维度
-            activator (_type_): _description_激活函数
-        """
+
+# 全连接层实现类
+class FullConnectedLayer(object):
+    def __init__(self, input_size, output_size,
+                 activator):
+        '''
+        构造函数
+        input_size: 本层输入向量的维度
+        output_size: 本层输出向量的维度
+        activator: 激活函数
+        '''
         self.input_size = input_size
         self.output_size = output_size
         self.activator = activator
-
         # 权重数组W
-        self.W = np.random.uniform(-0.1, 0.1,(output_size, input_size))
+        self.W = np.random.uniform(-0.1, 0.1,
+                                   (output_size, input_size))
         # 偏置项b
         self.b = np.zeros((output_size, 1))
         # 输出向量
         self.output = np.zeros((output_size, 1))
 
     def forward(self, input_array):
-        """_summary_
+        '''
         前向计算
-        Args:
-            input_array (_type_): _description_输入向量，维度必须等于input_size
-        """
+        input_array: 输入向量，维度必须等于input_size
+        '''
+        # 式2
         self.input = input_array
-        self.output = self.activator.forward(np.dot(self.W, input_array) + self.b)
+        self.output = self.activator.forward(
+            np.dot(self.W, input_array) + self.b)
 
     def backward(self, delta_array):
         '''
@@ -42,7 +45,6 @@ class FullConnectedLayer():
             self.W.T, delta_array)
         self.W_grad = np.dot(delta_array, self.input.T)
         self.b_grad = delta_array
-
 
     def update(self, learning_rate):
         '''
@@ -131,7 +133,7 @@ class Network(object):
         self.calc_gradient(sample_label)
 
         # 检查梯度
-        epsilon = 1e-4
+        epsilon = 10e-4
         for fc in self.layers:
             for i in range(fc.W.shape[0]):
                 for j in range(fc.W.shape[1]):
@@ -146,6 +148,12 @@ class Network(object):
                     print('weights(%d,%d): expected - actural %.4e - %.4e' % (
                         i, j, expect_grad, fc.W_grad[i, j]))
 
+
+def transpose(args):
+    return list(map(
+        lambda arg: list(map(
+            lambda line: np.array(line).reshape(len(line), 1), arg)), args
+    ))
 
 class Normalizer(object):
     def __init__(self):
@@ -162,16 +170,6 @@ class Normalizer(object):
         for i in range(len(self.mask)):
             binary[i] = binary[i] * self.mask[i]
         return reduce(lambda x, y: x + y, binary)
-
-
-def transpose(args):
-    return list(map(
-        lambda arg: list(map(
-            lambda line: np.array(line).reshape(len(line), 1)
-            , arg))
-        , args
-    ))
-
 
 
 def train_data_set():
@@ -196,10 +194,10 @@ def correct_ratio(network):
 
 def test():
     labels, data_set = transpose(train_data_set())
-    net = Network([8, 5, 8])
+    net = Network([8, 3, 8])
     rate = 0.5
     mini_batch = 20
-    epoch = 20
+    epoch = 10
     for i in range(epoch):
         net.train(labels, data_set, rate, mini_batch)
         print('after epoch %d loss: %f' % (
