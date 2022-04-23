@@ -30,7 +30,7 @@ class FullConnectedLayer():
             input_array (_type_): _description_输入向量，维度必须等于input_size
         """
         self.input = input_array
-        self.output = self.activator(np.dot(self.W,input_array)+self.b)
+        self.output = self.activator.forward(np.dot(self.W, input_array) + self.b)
 
     def backward(self, delta_array):
         '''
@@ -196,10 +196,10 @@ def correct_ratio(network):
 
 def test():
     labels, data_set = transpose(train_data_set())
-    net = Network([8, 3, 8])
+    net = Network([8, 5, 8])
     rate = 0.5
     mini_batch = 20
-    epoch = 10
+    epoch = 20
     for i in range(epoch):
         net.train(labels, data_set, rate, mini_batch)
         print('after epoch %d loss: %f' % (
@@ -220,3 +220,8 @@ def gradient_check():
     return net
 
 
+
+
+if __name__=="__main__":
+    test()
+    gradient_check()
